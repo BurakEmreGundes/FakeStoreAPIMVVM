@@ -46,11 +46,11 @@ struct ProductService : IProductService{
                     
             }
         }
-    }
+        }.resume()
     }
     
     func getOneProduct(id: Int, completion: @escaping (ProductModel?) -> ()) {
-        <#code#>
+        print("sea")
     }
     
 
