@@ -23,28 +23,31 @@ enum ProductServiceEndPoint : String{
 
 
 protocol IProductService{
-    func fetchAllProducts(completion : @escaping([ProductModel]?)->())
+    func fetchAllProducts(completion : @escaping(Result<[ProductModel]?,DownloandError>)->())
     func getOneProduct(id : Int,completion : @escaping(ProductModel?)->())
 }
 
 
 struct ProductService : IProductService{
     
-    func fetchAllProducts(completion: @escaping ([ProductModel]?) -> ()) {
+    func fetchAllProducts(completion: @escaping (Result<[ProductModel]?,DownloandError>) -> ()) {
         URLSession.shared.dataTask(with: ProductServiceEndPoint.productsPath()) { data, response, error in
             if let error = error {
                 print(error.localizedDescription)
-                completion(nil)
+                completion(.failure(.badUrl))
             }else{
-                if let data = data{
-                    do{
-                        let results =  try JSONDecoder().decode([ProductModel].self, from: data)
-                            completion(results)
-                    }catch{
-                        print("Product Çevirme İşleminde Hata Oluştu")
-                    }
-                    
-            }
+                
+                
+                guard let data = data, error == nil else {
+                    return completion(.failure(.noData))
+                }
+                
+                guard let results = try? JSONDecoder().decode([ProductModel].self, from: data) else {
+                    return completion(.failure(.dataParserError))
+                }
+                        
+                completion(.success(results))
+          
         }
         }.resume()
     }
@@ -58,3 +61,10 @@ struct ProductService : IProductService{
     
     
 }
+
+enum DownloandError : Error{
+    case badUrl
+    case noData
+    case dataParserError
+}
+

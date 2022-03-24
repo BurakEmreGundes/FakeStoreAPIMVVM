@@ -31,12 +31,21 @@ final class ProductListViewModel : IProductListViewModel{
    
     
      func getAllProducts() {
-        productService.fetchAllProducts { products in
-            if let products = products {
-               self.products = products
-                self.productListOutPut?.saveDatas(values: products)
+        productService.fetchAllProducts { results in
+            
+            switch results {
+            case .success(let products):
+                if let products = products{
+                    self.products = products
+                    self.productListOutPut?.saveDatas(values: products)
+                }
+            case .failure(let error):
+                print(error)
+                
             }
+           
         }
+       
     }
     
     func setDelegate(output: IProductListOutPut) {
